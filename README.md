@@ -2,7 +2,7 @@
 
 AI-powered job offer analyzer. Paste any offer letter or employment contract and get an instant plain-English breakdown of non-competes, IP grabs, equity traps, arbitration clauses, and more — before you sign.
 
-**Live site:** https://contract-scanner-six.vercel.app
+**Live site:** https://offer-scanner.vercel.app
 
 ---
 
