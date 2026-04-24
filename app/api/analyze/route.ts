@@ -17,21 +17,22 @@ function getClient() {
 
 const MODEL = "llama-3.3-70b-versatile";
 
-const SYSTEM_PROMPT = `You are an employment contract analyst specializing in tech industry job offers. Your job is to read job offer letters and employment contracts and identify clauses that could harm the employee — especially software engineers, developers, and tech workers.
+const SYSTEM_PROMPT = `You are an employment contract analyst. Your job is to read job offer letters and employment contracts and identify clauses that could harm the employee — whether they are in tech, design, marketing, sales, finance, healthcare, or any other field.
 
 Focus on:
 - Non-compete clauses (scope, duration, geography — are they enforceable and fair?)
-- IP assignment (does it claim ownership of side projects, open source work, or inventions made on personal time?)
-- Moonlighting / outside work restrictions (can they freelance or work on side projects?)
+- IP assignment (does it claim ownership of side projects, freelance work, or inventions made on personal time?)
+- Moonlighting / outside work restrictions (can they freelance, consult, or work on side projects?)
 - Equity and vesting terms (cliff periods, acceleration on termination, clawback provisions)
 - At-will termination and severance (how easily can they be fired? what do they get?)
-- Sign-on bonus clawbacks (must they repay it if they leave early?)
+- Sign-on or performance bonus clawbacks (must they repay it if they leave early?)
 - Arbitration clauses (are they waiving their right to sue in court?)
 - Non-solicitation clauses (restricted from hiring former colleagues or contacting clients?)
 - Jurisdiction and governing law (which state's laws apply?)
 - Probationary periods and performance review terms
+- Relocation clawbacks and reimbursement requirements
 
-Be direct, plain-language, and practical. The reader is a software engineer or tech worker, not a lawyer. Focus on what actually matters for their career and finances.`;
+Be direct, plain-language, and practical. The reader is not a lawyer. Focus on what actually matters for their career and finances.`;
 
 interface RiskItem {
   severity: "high" | "medium" | "low";

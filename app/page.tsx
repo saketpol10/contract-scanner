@@ -66,7 +66,7 @@ export default function Home() {
       <section className="max-w-5xl mx-auto px-6 pt-24 pb-16 text-center">
         <div className="inline-flex items-center gap-2 bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-semibold px-3 py-1.5 rounded-full mb-8 tracking-wide uppercase">
           <span className="w-1.5 h-1.5 bg-blue-400 rounded-full animate-pulse" />
-          Built for developers & tech workers
+          Free · Instant · No signup
         </div>
         <h1 className="text-5xl sm:text-6xl font-bold text-white leading-tight mb-6">
           Read your job offer<br />
@@ -76,7 +76,8 @@ export default function Home() {
         </h1>
         <p className="text-gray-400 text-xl max-w-2xl mx-auto leading-relaxed mb-10">
           Paste your job offer or employment contract. Get an instant plain-English breakdown
-          of non-competes, IP grabs, equity traps, and other clauses that could cost you later.
+          of non-competes, IP grabs, equity traps, arbitration clauses, and anything else
+          that could cost you later.
         </p>
         <div className="flex items-center justify-center gap-6 text-sm text-gray-500 mb-16">
           <span className="flex items-center gap-1.5"><span className="text-green-400">✓</span> No signup required</span>
@@ -174,26 +175,26 @@ export default function Home() {
 
       {/* Who it's for */}
       <section className="max-w-5xl mx-auto px-6 py-24 border-t border-white/5">
-        <h2 className="text-3xl font-bold text-white text-center mb-4">Built for tech workers</h2>
+        <h2 className="text-3xl font-bold text-white text-center mb-4">Built for everyone</h2>
         <p className="text-gray-500 text-center mb-16">
           Employment lawyers charge $300–$500/hr. OfferScan is free.
         </p>
         <div className="grid sm:grid-cols-3 gap-6">
           {[
             {
-              icon: "👨‍💻",
-              title: "New grad / first job",
+              icon: "🎓",
+              title: "First job / new grad",
               desc: "Your first offer letter is full of legal language. Know what you're agreeing to before you sign.",
             },
             {
               icon: "🔄",
               title: "Switching companies",
-              desc: "Check non-competes, IP clauses, and equity terms before leaving your current role.",
+              desc: "Check non-competes, IP clauses, and notice periods before leaving your current role.",
             },
             {
               icon: "🚀",
               title: "Joining a startup",
-              desc: "Equity vesting, cliff periods, acceleration clauses — understand your actual upside.",
+              desc: "Equity vesting, cliff periods, acceleration clauses — understand what you're actually getting.",
             },
           ].map((item) => (
             <div
