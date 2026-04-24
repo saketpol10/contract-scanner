@@ -15,3 +15,10 @@ out/
 *.pem
 npm-debug.log*
 .vercel
+
+# terraform — never commit secrets or state
+terraform/.terraform/
+terraform/terraform.tfvars
+terraform/*.tfstate
+terraform/*.tfstate.backup
+terraform/.terraform.lock.hcl
