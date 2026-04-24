@@ -27,3 +27,14 @@ variable "otel_headers" {
   type        = string
   sensitive   = true
 }
+
+variable "upstash_redis_rest_url" {
+  description = "Upstash Redis REST URL for rate limiting"
+  type        = string
+}
+
+variable "upstash_redis_rest_token" {
+  description = "Upstash Redis REST token for rate limiting"
+  type        = string
+  sensitive   = true
+}

@@ -46,3 +46,20 @@ resource "vercel_project_environment_variable" "otel_headers" {
   target     = ["production", "preview"]
   sensitive  = true
 }
+
+resource "vercel_project_environment_variable" "upstash_url" {
+  project_id = vercel_project.contract_scanner.id
+  team_id    = var.vercel_team_id
+  key        = "UPSTASH_REDIS_REST_URL"
+  value      = var.upstash_redis_rest_url
+  target     = ["production", "preview"]
+}
+
+resource "vercel_project_environment_variable" "upstash_token" {
+  project_id = vercel_project.contract_scanner.id
+  team_id    = var.vercel_team_id
+  key        = "UPSTASH_REDIS_REST_TOKEN"
+  value      = var.upstash_redis_rest_token
+  target     = ["production", "preview"]
+  sensitive  = true
+}

@@ -1,6 +1,15 @@
 import Groq from "groq-sdk";
 import { NextRequest, NextResponse } from "next/server";
 import { trace, SpanStatusCode } from "@opentelemetry/api";
+import { Ratelimit } from "@upstash/ratelimit";
+import { Redis } from "@upstash/redis";
+
+const ratelimit = new Ratelimit({
+  redis: Redis.fromEnv(),
+  limiter: Ratelimit.slidingWindow(5, "1 h"), // 5 requests per hour per IP
+  analytics: true,
+  prefix: "contract-scanner",
+});
 
 function getClient() {
   return new Groq({ apiKey: process.env.GROQ_API_KEY });
@@ -42,6 +51,32 @@ export async function POST(req: NextRequest) {
 
   return tracer.startActiveSpan("analyze_contract", async (span) => {
     try {
+      // Rate limiting — 5 analyses per IP per hour
+      const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim()
+        ?? req.headers.get("x-real-ip")
+        ?? "anonymous";
+
+      const { success, limit, remaining, reset } = await ratelimit.limit(ip);
+
+      if (!success) {
+        const resetIn = Math.ceil((reset - Date.now()) / 1000 / 60);
+        span.setAttribute("rate_limited", true);
+        span.end();
+        return NextResponse.json(
+          { error: `Rate limit reached. You can analyze ${limit} contracts per hour. Try again in ${resetIn} minute${resetIn === 1 ? "" : "s"}.` },
+          {
+            status: 429,
+            headers: {
+              "X-RateLimit-Limit": String(limit),
+              "X-RateLimit-Remaining": String(remaining),
+              "X-RateLimit-Reset": String(reset),
+            },
+          }
+        );
+      }
+
+      span.setAttribute("rate_limit.remaining", remaining);
+
       const { text } = await req.json();
 
       if (!text || typeof text !== "string") {
