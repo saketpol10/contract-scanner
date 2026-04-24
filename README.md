@@ -1,37 +1,41 @@
-# ContractScan
+# OfferScan
 
-AI-powered contract risk scanner. Paste any contract and get an instant breakdown of risky clauses — non-competes, IP grabs, hidden auto-renewals, unlimited liability, and more — explained in plain English.
+AI-powered job offer analyzer for tech workers. Paste any offer letter or employment contract and get an instant plain-English breakdown of non-competes, IP grabs, equity traps, arbitration clauses, and more — before you sign.
 
-**Live site:** https://contract-scanner-8w4nch33q-saketpol10s-projects.vercel.app
+**Live site:** https://contract-scanner.vercel.app
 
 ---
 
 ## Features
 
-- Paste contract text or upload a PDF / TXT file
+- Paste offer letter text or upload a PDF / TXT file
 - AI analysis powered by Llama 3.3 70B via Groq
 - Flags clauses by severity: High / Medium / Low
-- Plain-English explanations + actionable recommendations
+- Plain-English explanations + what you can negotiate
 - Lists safe/standard clauses too
-- No login, no storage, completely free to use
+- Rate limited to 5 analyses per hour per IP
+- No login, no storage, completely free
 
 ## What it flags
 
-- Unlimited liability and indemnification
-- IP assignment (ownership of your work or ideas)
-- Non-compete and non-solicitation clauses
-- Auto-renewal and hard-to-cancel terms
-- Unilateral modification rights
-- Payment traps and late fees
-- Termination without cause
-- Unfavorable jurisdiction clauses
+- Non-compete clauses (scope, duration, geography)
+- IP assignment (ownership of side projects and personal work)
+- Moonlighting and outside work restrictions
+- Equity and vesting terms (cliffs, acceleration, clawbacks)
+- At-will termination and severance
+- Sign-on bonus clawback provisions
+- Arbitration clauses (waiving right to sue in court)
+- Non-solicitation restrictions
+- Jurisdiction and governing law
 
 ## Stack
 
 - **Framework:** Next.js 16 (App Router)
 - **AI:** Groq API — `llama-3.3-70b-versatile`
+- **Rate limiting:** Upstash Redis
 - **Styling:** Tailwind CSS
 - **PDF parsing:** pdf-parse
+- **Infrastructure:** Terraform (Vercel provider)
 - **Deployment:** Vercel
 
 ## Running locally
@@ -39,8 +43,8 @@ AI-powered contract risk scanner. Paste any contract and get an instant breakdow
 1. Clone the repo
 
 ```bash
-git clone https://github.com/saketpol10/contract-scanner.git
-cd contract-scanner
+git clone https://github.com/saketpol10/offer-scan.git
+cd offer-scan
 ```
 
 2. Install dependencies
@@ -49,10 +53,12 @@ cd contract-scanner
 npm install
 ```
 
-3. Add your Groq API key — get one free at [console.groq.com](https://console.groq.com)
+3. Create `.env.local` with your keys
 
 ```bash
-echo "GROQ_API_KEY=your_key_here" > .env.local
+GROQ_API_KEY=your_groq_key          # console.groq.com — free
+UPSTASH_REDIS_REST_URL=your_url     # console.upstash.com — free
+UPSTASH_REDIS_REST_TOKEN=your_token
 ```
 
 4. Start the dev server
@@ -79,16 +85,29 @@ Available Groq models:
 | `llama3-8b-8192` | Very fast | Quick checks |
 | `mixtral-8x7b-32768` | Fast | Long contracts |
 
+## Infrastructure (Terraform)
+
+Vercel project and environment variables are managed as code:
+
+```bash
+cd terraform
+terraform init
+terraform plan -var-file=terraform.tfvars
+terraform apply -var-file=terraform.tfvars
+```
+
+See `terraform/terraform.tfvars.example` for required variables.
+
 ## Deploying to Vercel
 
 ```bash
 npm install -g vercel
 vercel login
-vercel --yes
+vercel --prod
 ```
 
-Add `GROQ_API_KEY` in your Vercel project under **Settings → Environment Variables**, then redeploy.
+Add `GROQ_API_KEY`, `UPSTASH_REDIS_REST_URL`, and `UPSTASH_REDIS_REST_TOKEN` in your Vercel project under **Settings → Environment Variables**.
 
 ## Disclaimer
 
-ContractScan is for informational purposes only and does not constitute legal advice. For important or high-value contracts, consult a licensed attorney.
+OfferScan is for informational purposes only and does not constitute legal advice. For important or high-value contracts, consult a licensed employment attorney.
