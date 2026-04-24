@@ -17,12 +17,6 @@ provider "vercel" {
 resource "vercel_project" "contract_scanner" {
   name      = "contract-scanner"
   framework = "nextjs"
-
-  git_repository = {
-    type              = "github"
-    repo              = "saketpol10/contract-scanner"
-    production_branch = "main"
-  }
 }
 
 # ── Environment variables ─────────────────────────────────────────────────────
@@ -32,6 +26,6 @@ resource "vercel_project_environment_variable" "groq_api_key" {
   team_id    = var.vercel_team_id
   key        = "GROQ_API_KEY"
   value      = var.groq_api_key
-  targets    = ["production", "preview", "development"]
+  target     = ["production", "preview"]
   sensitive  = true
 }
