@@ -1,6 +1,6 @@
 # OfferScan
 
-AI-powered job offer analyzer for tech workers. Paste any offer letter or employment contract and get an instant plain-English breakdown of non-competes, IP grabs, equity traps, arbitration clauses, and more — before you sign.
+AI-powered job offer analyzer. Paste any offer letter or employment contract and get an instant plain-English breakdown of non-competes, IP grabs, equity traps, arbitration clauses, and more — before you sign.
 
 **Live site:** https://contract-scanner.vercel.app
 
@@ -13,7 +13,7 @@ AI-powered job offer analyzer for tech workers. Paste any offer letter or employ
 - Flags clauses by severity: High / Medium / Low
 - Plain-English explanations + what you can negotiate
 - Lists safe/standard clauses too
-- Rate limited to 5 analyses per hour per IP
+- Rate limited to 5 analyses per hour per IP (via Upstash Redis)
 - No login, no storage, completely free
 
 ## What it flags
@@ -23,9 +23,10 @@ AI-powered job offer analyzer for tech workers. Paste any offer letter or employ
 - Moonlighting and outside work restrictions
 - Equity and vesting terms (cliffs, acceleration, clawbacks)
 - At-will termination and severance
-- Sign-on bonus clawback provisions
+- Sign-on and performance bonus clawback provisions
 - Arbitration clauses (waiving right to sue in court)
 - Non-solicitation restrictions
+- Relocation clawbacks and reimbursement requirements
 - Jurisdiction and governing law
 
 ## Stack
@@ -53,12 +54,12 @@ cd offer-scan
 npm install
 ```
 
-3. Create `.env.local` with your keys
+3. Create `.env.local` — copy the example and fill in your keys
 
-```bash
-GROQ_API_KEY=your_groq_key          # console.groq.com — free
-UPSTASH_REDIS_REST_URL=your_url     # console.upstash.com — free
-UPSTASH_REDIS_REST_TOKEN=your_token
+```
+GROQ_API_KEY=              # console.groq.com — free
+UPSTASH_REDIS_REST_URL=    # console.upstash.com — free
+UPSTASH_REDIS_REST_TOKEN=
 ```
 
 4. Start the dev server
@@ -69,7 +70,7 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000).
 
-## Changing the model
+## Changing the AI model
 
 Open `app/api/analyze/route.ts` and edit the `MODEL` constant:
 
@@ -87,16 +88,15 @@ Available Groq models:
 
 ## Infrastructure (Terraform)
 
-Vercel project and environment variables are managed as code:
+Vercel project and environment variables are managed as code. See `terraform/terraform.tfvars.example` for required variables.
 
 ```bash
 cd terraform
+cp terraform.tfvars.example terraform.tfvars  # fill in your values
 terraform init
 terraform plan -var-file=terraform.tfvars
 terraform apply -var-file=terraform.tfvars
 ```
-
-See `terraform/terraform.tfvars.example` for required variables.
 
 ## Deploying to Vercel
 
@@ -106,7 +106,7 @@ vercel login
 vercel --prod
 ```
 
-Add `GROQ_API_KEY`, `UPSTASH_REDIS_REST_URL`, and `UPSTASH_REDIS_REST_TOKEN` in your Vercel project under **Settings → Environment Variables**.
+Add the three env vars (`GROQ_API_KEY`, `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN`) in your Vercel project under **Settings → Environment Variables**.
 
 ## Disclaimer
 
