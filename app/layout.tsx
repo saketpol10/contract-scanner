@@ -5,12 +5,12 @@ import "./globals.css";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "ContractScan — AI Contract Risk Scanner",
+  title: "OfferScan — AI Job Offer Analyzer for Tech Workers",
   description:
-    "Paste any contract and get an instant AI breakdown of risky clauses. Non-competes, IP grabs, hidden auto-renewals, and more — explained in plain English.",
+    "Paste your job offer or employment contract and get an instant AI breakdown of non-competes, IP clauses, equity terms, and hidden risks — explained in plain English.",
   openGraph: {
-    title: "ContractScan — AI Contract Risk Scanner",
-    description: "Know what you're signing. Free AI contract analysis in seconds.",
+    title: "OfferScan — AI Job Offer Analyzer for Tech Workers",
+    description: "Know what you're signing. Free AI job offer analysis built for developers.",
     type: "website",
   },
 };

@@ -75,7 +75,7 @@ export default function ContractUpload({ onAnalyze, loading, error }: Props) {
           <p className="text-blue-400 font-medium">{fileName} loaded</p>
         ) : (
           <>
-            <p className="text-gray-300 font-medium">Drop your contract here</p>
+            <p className="text-gray-300 font-medium">Drop your offer letter here</p>
             <p className="text-gray-500 text-sm mt-1">PDF or TXT — or click to browse</p>
           </>
         )}
@@ -92,7 +92,7 @@ export default function ContractUpload({ onAnalyze, loading, error }: Props) {
       <textarea
         value={text}
         onChange={(e) => { setText(e.target.value); setFileName(null); }}
-        placeholder="Paste your contract text here..."
+        placeholder="Paste your offer letter or employment contract here..."
         rows={10}
         className="w-full bg-gray-900 border border-gray-800 rounded-xl p-4 text-gray-300 placeholder-gray-600 resize-none focus:outline-none focus:border-blue-500 transition-colors text-sm font-mono"
       />

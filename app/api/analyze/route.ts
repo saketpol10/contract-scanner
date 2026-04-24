@@ -17,19 +17,21 @@ function getClient() {
 
 const MODEL = "llama-3.3-70b-versatile";
 
-const SYSTEM_PROMPT = `You are a contract risk analyst. Your job is to read contracts and identify clauses that could harm the party signing.
+const SYSTEM_PROMPT = `You are an employment contract analyst specializing in tech industry job offers. Your job is to read job offer letters and employment contracts and identify clauses that could harm the employee — especially software engineers, developers, and tech workers.
 
 Focus on:
-- Unlimited liability or indemnification
-- IP assignment (taking ownership of your work/ideas)
-- Non-compete and non-solicitation clauses
-- Auto-renewal and cancellation terms
-- Unilateral modification rights (they can change terms anytime)
-- Payment terms and late fees
-- Termination without cause
-- Jurisdiction and governing law issues
+- Non-compete clauses (scope, duration, geography — are they enforceable and fair?)
+- IP assignment (does it claim ownership of side projects, open source work, or inventions made on personal time?)
+- Moonlighting / outside work restrictions (can they freelance or work on side projects?)
+- Equity and vesting terms (cliff periods, acceleration on termination, clawback provisions)
+- At-will termination and severance (how easily can they be fired? what do they get?)
+- Sign-on bonus clawbacks (must they repay it if they leave early?)
+- Arbitration clauses (are they waiving their right to sue in court?)
+- Non-solicitation clauses (restricted from hiring former colleagues or contacting clients?)
+- Jurisdiction and governing law (which state's laws apply?)
+- Probationary periods and performance review terms
 
-Be direct, plain-language, and practical. The reader is not a lawyer.`;
+Be direct, plain-language, and practical. The reader is a software engineer or tech worker, not a lawyer. Focus on what actually matters for their career and finances.`;
 
 interface RiskItem {
   severity: "high" | "medium" | "low";
