@@ -1,6 +1,6 @@
 import Groq from "groq-sdk";
 import { NextRequest, NextResponse } from "next/server";
-import { trace, metrics } from "@opentelemetry/api";
+import { trace, SpanStatusCode } from "@opentelemetry/api";
 
 function getClient() {
   return new Groq({ apiKey: process.env.GROQ_API_KEY });
@@ -36,20 +36,6 @@ interface AnalysisResult {
   safe_clauses: string[];
 }
 
-const meter = metrics.getMeter("contract-scanner");
-const analyzeCounter = meter.createCounter("analyze_requests_total", {
-  description: "Total number of contract analysis requests",
-});
-const errorCounter = meter.createCounter("analyze_errors_total", {
-  description: "Total number of failed analysis requests",
-});
-const latencyHistogram = meter.createHistogram("analyze_latency_ms", {
-  description: "Contract analysis latency in milliseconds",
-});
-const riskCounter = meter.createCounter("analyze_risk_level_total", {
-  description: "Count of analyses by overall risk level",
-});
-
 export async function POST(req: NextRequest) {
   const tracer = trace.getTracer("contract-scanner");
   const startTime = Date.now();
@@ -59,24 +45,27 @@ export async function POST(req: NextRequest) {
       const { text } = await req.json();
 
       if (!text || typeof text !== "string") {
-        errorCounter.add(1, { reason: "missing_text" });
+        span.setStatus({ code: SpanStatusCode.ERROR, message: "missing_text" });
+        span.setAttribute("error.reason", "missing_text");
         span.end();
         return NextResponse.json({ error: "Contract text is required" }, { status: 400 });
       }
 
       if (text.trim().length < 100) {
-        errorCounter.add(1, { reason: "text_too_short" });
+        span.setStatus({ code: SpanStatusCode.ERROR, message: "text_too_short" });
+        span.setAttribute("error.reason", "text_too_short");
         span.end();
         return NextResponse.json({ error: "Contract text is too short to analyze" }, { status: 400 });
       }
 
       if (text.length > 100_000) {
-        errorCounter.add(1, { reason: "text_too_long" });
+        span.setStatus({ code: SpanStatusCode.ERROR, message: "text_too_long" });
+        span.setAttribute("error.reason", "text_too_long");
         span.end();
         return NextResponse.json({ error: "Contract is too long (max 100,000 characters)" }, { status: 400 });
       }
 
-      span.setAttribute("contract.length", text.length);
+      span.setAttribute("contract.char_count", text.length);
       span.setAttribute("model", MODEL);
 
       const response = await getClient().chat.completions.create({
@@ -116,23 +105,23 @@ ${text}`,
         .trim();
 
       const result: AnalysisResult = JSON.parse(raw);
-      const latency = Date.now() - startTime;
-
-      analyzeCounter.add(1, { model: MODEL, risk: result.overall_risk });
-      riskCounter.add(1, { level: result.overall_risk });
-      latencyHistogram.record(latency, { model: MODEL });
+      const latencyMs = Date.now() - startTime;
 
       span.setAttribute("result.overall_risk", result.overall_risk);
       span.setAttribute("result.risk_count", result.risks.length);
-      span.setAttribute("latency_ms", latency);
+      span.setAttribute("result.high_risks", result.risks.filter(r => r.severity === "high").length);
+      span.setAttribute("result.medium_risks", result.risks.filter(r => r.severity === "medium").length);
+      span.setAttribute("result.low_risks", result.risks.filter(r => r.severity === "low").length);
+      span.setAttribute("latency_ms", latencyMs);
+      span.setAttribute("success", true);
+      span.setStatus({ code: SpanStatusCode.OK });
       span.end();
 
       return NextResponse.json(result);
     } catch (err) {
-      const latency = Date.now() - startTime;
-      errorCounter.add(1, { reason: "server_error" });
-      latencyHistogram.record(latency, { model: MODEL, error: "true" });
       span.recordException(err as Error);
+      span.setStatus({ code: SpanStatusCode.ERROR, message: (err as Error).message });
+      span.setAttribute("success", false);
       span.end();
       console.error("Analysis error:", err);
       return NextResponse.json(
