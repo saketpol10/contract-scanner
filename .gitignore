@@ -20,5 +20,5 @@ npm-debug.log*
 terraform/.terraform/
 terraform/terraform.tfvars
 terraform/*.tfstate
-terraform/*.tfstate.backup
+terraform/*.tfstate.*
 terraform/.terraform.lock.hcl

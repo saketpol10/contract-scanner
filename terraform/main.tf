@@ -14,15 +14,15 @@ provider "vercel" {
 
 # ── Project ──────────────────────────────────────────────────────────────────
 
-resource "vercel_project" "contract_scanner" {
-  name      = "contract-scanner"
+resource "vercel_project" "offer_scan" {
+  name      = "offer-scan"
   framework = "nextjs"
 }
 
 # ── Environment variables ─────────────────────────────────────────────────────
 
 resource "vercel_project_environment_variable" "groq_api_key" {
-  project_id = vercel_project.contract_scanner.id
+  project_id = vercel_project.offer_scan.id
   team_id    = var.vercel_team_id
   key        = "GROQ_API_KEY"
   value      = var.groq_api_key
@@ -31,7 +31,7 @@ resource "vercel_project_environment_variable" "groq_api_key" {
 }
 
 resource "vercel_project_environment_variable" "otel_endpoint" {
-  project_id = vercel_project.contract_scanner.id
+  project_id = vercel_project.offer_scan.id
   team_id    = var.vercel_team_id
   key        = "OTEL_EXPORTER_OTLP_ENDPOINT"
   value      = var.otel_endpoint
@@ -39,7 +39,7 @@ resource "vercel_project_environment_variable" "otel_endpoint" {
 }
 
 resource "vercel_project_environment_variable" "otel_headers" {
-  project_id = vercel_project.contract_scanner.id
+  project_id = vercel_project.offer_scan.id
   team_id    = var.vercel_team_id
   key        = "OTEL_EXPORTER_OTLP_HEADERS"
   value      = var.otel_headers
@@ -48,7 +48,7 @@ resource "vercel_project_environment_variable" "otel_headers" {
 }
 
 resource "vercel_project_environment_variable" "upstash_url" {
-  project_id = vercel_project.contract_scanner.id
+  project_id = vercel_project.offer_scan.id
   team_id    = var.vercel_team_id
   key        = "UPSTASH_REDIS_REST_URL"
   value      = var.upstash_redis_rest_url
@@ -56,7 +56,7 @@ resource "vercel_project_environment_variable" "upstash_url" {
 }
 
 resource "vercel_project_environment_variable" "upstash_token" {
-  project_id = vercel_project.contract_scanner.id
+  project_id = vercel_project.offer_scan.id
   team_id    = var.vercel_team_id
   key        = "UPSTASH_REDIS_REST_TOKEN"
   value      = var.upstash_redis_rest_token

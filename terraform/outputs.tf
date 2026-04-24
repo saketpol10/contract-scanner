@@ -1,9 +1,9 @@
 output "project_id" {
   description = "Vercel project ID"
-  value       = vercel_project.contract_scanner.id
+  value       = vercel_project.offer_scan.id
 }
 
 output "production_url" {
   description = "Production deployment URL"
-  value       = "https://${vercel_project.contract_scanner.name}.vercel.app"
+  value       = "https://${vercel_project.offer_scan.name}.vercel.app"
 }
