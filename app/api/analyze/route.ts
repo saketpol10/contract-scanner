@@ -1,9 +1,9 @@
 import Groq from "groq-sdk";
 import { NextRequest, NextResponse } from "next/server";
 
-const client = new Groq({
-  apiKey: process.env.GROQ_API_KEY,
-});
+function getClient() {
+  return new Groq({ apiKey: process.env.GROQ_API_KEY });
+}
 
 // ✏️ Change this to any Groq model you want:
 // - "llama-3.3-70b-versatile"   → best quality (recommended)
@@ -55,7 +55,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Contract is too long (max 100,000 characters)" }, { status: 400 });
     }
 
-    const response = await client.chat.completions.create({
+    const response = await getClient().chat.completions.create({
       model: MODEL,
       max_tokens: 4096,
       messages: [
