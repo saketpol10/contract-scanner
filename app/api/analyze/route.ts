@@ -1,14 +1,11 @@
 import Groq from "groq-sdk";
 import { NextRequest, NextResponse } from "next/server";
+import { trace, metrics } from "@opentelemetry/api";
 
 function getClient() {
   return new Groq({ apiKey: process.env.GROQ_API_KEY });
 }
 
-// ✏️ Change this to any Groq model you want:
-// - "llama-3.3-70b-versatile"   → best quality (recommended)
-// - "llama3-8b-8192"            → faster, lighter
-// - "mixtral-8x7b-32768"        → good for long contracts
 const MODEL = "llama-3.3-70b-versatile";
 
 const SYSTEM_PROMPT = `You are a contract risk analyst. Your job is to read contracts and identify clauses that could harm the party signing.
@@ -39,30 +36,57 @@ interface AnalysisResult {
   safe_clauses: string[];
 }
 
+const meter = metrics.getMeter("contract-scanner");
+const analyzeCounter = meter.createCounter("analyze_requests_total", {
+  description: "Total number of contract analysis requests",
+});
+const errorCounter = meter.createCounter("analyze_errors_total", {
+  description: "Total number of failed analysis requests",
+});
+const latencyHistogram = meter.createHistogram("analyze_latency_ms", {
+  description: "Contract analysis latency in milliseconds",
+});
+const riskCounter = meter.createCounter("analyze_risk_level_total", {
+  description: "Count of analyses by overall risk level",
+});
+
 export async function POST(req: NextRequest) {
-  try {
-    const { text } = await req.json();
+  const tracer = trace.getTracer("contract-scanner");
+  const startTime = Date.now();
 
-    if (!text || typeof text !== "string") {
-      return NextResponse.json({ error: "Contract text is required" }, { status: 400 });
-    }
+  return tracer.startActiveSpan("analyze_contract", async (span) => {
+    try {
+      const { text } = await req.json();
 
-    if (text.trim().length < 100) {
-      return NextResponse.json({ error: "Contract text is too short to analyze" }, { status: 400 });
-    }
+      if (!text || typeof text !== "string") {
+        errorCounter.add(1, { reason: "missing_text" });
+        span.end();
+        return NextResponse.json({ error: "Contract text is required" }, { status: 400 });
+      }
 
-    if (text.length > 100_000) {
-      return NextResponse.json({ error: "Contract is too long (max 100,000 characters)" }, { status: 400 });
-    }
+      if (text.trim().length < 100) {
+        errorCounter.add(1, { reason: "text_too_short" });
+        span.end();
+        return NextResponse.json({ error: "Contract text is too short to analyze" }, { status: 400 });
+      }
 
-    const response = await getClient().chat.completions.create({
-      model: MODEL,
-      max_tokens: 4096,
-      messages: [
-        { role: "system", content: SYSTEM_PROMPT },
-        {
-          role: "user",
-          content: `Analyze this contract and return a JSON object with exactly this structure:
+      if (text.length > 100_000) {
+        errorCounter.add(1, { reason: "text_too_long" });
+        span.end();
+        return NextResponse.json({ error: "Contract is too long (max 100,000 characters)" }, { status: 400 });
+      }
+
+      span.setAttribute("contract.length", text.length);
+      span.setAttribute("model", MODEL);
+
+      const response = await getClient().chat.completions.create({
+        model: MODEL,
+        max_tokens: 4096,
+        messages: [
+          { role: "system", content: SYSTEM_PROMPT },
+          {
+            role: "user",
+            content: `Analyze this contract and return a JSON object with exactly this structure:
 
 {
   "summary": "2-3 sentence plain-language summary of what this contract is and who it's between",
@@ -82,22 +106,39 @@ Return ONLY valid JSON. No markdown code blocks, no explanation outside the JSON
 
 CONTRACT:
 ${text}`,
-        },
-      ],
-    });
+          },
+        ],
+      });
 
-    const raw = (response.choices[0].message.content ?? "")
-      .replace(/^```(?:json)?\n?/i, "")
-      .replace(/\n?```$/, "")
-      .trim();
+      const raw = (response.choices[0].message.content ?? "")
+        .replace(/^```(?:json)?\n?/i, "")
+        .replace(/\n?```$/, "")
+        .trim();
 
-    const result: AnalysisResult = JSON.parse(raw);
-    return NextResponse.json(result);
-  } catch (err) {
-    console.error("Analysis error:", err);
-    return NextResponse.json(
-      { error: "Failed to analyze contract. Please try again." },
-      { status: 500 }
-    );
-  }
+      const result: AnalysisResult = JSON.parse(raw);
+      const latency = Date.now() - startTime;
+
+      analyzeCounter.add(1, { model: MODEL, risk: result.overall_risk });
+      riskCounter.add(1, { level: result.overall_risk });
+      latencyHistogram.record(latency, { model: MODEL });
+
+      span.setAttribute("result.overall_risk", result.overall_risk);
+      span.setAttribute("result.risk_count", result.risks.length);
+      span.setAttribute("latency_ms", latency);
+      span.end();
+
+      return NextResponse.json(result);
+    } catch (err) {
+      const latency = Date.now() - startTime;
+      errorCounter.add(1, { reason: "server_error" });
+      latencyHistogram.record(latency, { model: MODEL, error: "true" });
+      span.recordException(err as Error);
+      span.end();
+      console.error("Analysis error:", err);
+      return NextResponse.json(
+        { error: "Failed to analyze contract. Please try again." },
+        { status: 500 }
+      );
+    }
+  });
 }

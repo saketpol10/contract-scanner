@@ -29,3 +29,20 @@ resource "vercel_project_environment_variable" "groq_api_key" {
   target     = ["production", "preview"]
   sensitive  = true
 }
+
+resource "vercel_project_environment_variable" "otel_endpoint" {
+  project_id = vercel_project.contract_scanner.id
+  team_id    = var.vercel_team_id
+  key        = "OTEL_EXPORTER_OTLP_ENDPOINT"
+  value      = var.otel_endpoint
+  target     = ["production", "preview"]
+}
+
+resource "vercel_project_environment_variable" "otel_headers" {
+  project_id = vercel_project.contract_scanner.id
+  team_id    = var.vercel_team_id
+  key        = "OTEL_EXPORTER_OTLP_HEADERS"
+  value      = var.otel_headers
+  target     = ["production", "preview"]
+  sensitive  = true
+}

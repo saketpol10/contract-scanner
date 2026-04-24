@@ -15,3 +15,15 @@ variable "groq_api_key" {
   type        = string
   sensitive   = true
 }
+
+variable "otel_endpoint" {
+  description = "OpenTelemetry OTLP endpoint (Grafana Cloud)"
+  type        = string
+  default     = "https://otlp-gateway-prod-eu-west-2.grafana.net/otlp"
+}
+
+variable "otel_headers" {
+  description = "OpenTelemetry OTLP auth header"
+  type        = string
+  sensitive   = true
+}
